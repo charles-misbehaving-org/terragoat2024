@@ -1,0 +1,40 @@
+name: Create Test PR
+
+on:
+  workflow_dispatch: # Allows manual triggering
+  schedule:
+    - cron: '0 8 * * *' # Every day at 8 AM UTC
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create or modify file
+        run: |
+          echo "This is a test file created on $(date)" > test-file.txt
+
+      - name: Create new branch
+        run: |
+          BRANCH_NAME="test-pr-$(date +'%Y%m%d-%H%M%S')"
+          git checkout -b "$BRANCH_NAME"
+          git add test-file.txt
+          git commit -m "Add test file for scheduled PR"
+          git push origin "$BRANCH_NAME"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Daily Test PR"
+          body: "Automated PR to test GitHub App behavior."
+          head: ${{ env.branch_name }}
+          base: main
