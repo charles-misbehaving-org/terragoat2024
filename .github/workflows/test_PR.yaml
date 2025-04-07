@@ -41,4 +41,4 @@ jobs:
           title: "Daily Test PR"
           body: "Automated PR to test GitHub App behavior."
           head: ${{ env.branch_name }}
-          base: main
+          base: master
