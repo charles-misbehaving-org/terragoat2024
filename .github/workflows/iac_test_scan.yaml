@@ -27,6 +27,7 @@ jobs:
             echo "LW_API_KEY=${{ secrets.LW_API_KEY }}" >> env.list
             echo "LW_API_SECRET=${{ secrets.LW_API_SECRET }}" >> env.list
             echo "EXIT_FLAG=CRITICAL=1" >> env.list
+            cat env.list
         - name: Set permissions
           run: |
             chmod -R 777 .
