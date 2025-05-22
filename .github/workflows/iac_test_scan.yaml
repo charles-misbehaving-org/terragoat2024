@@ -23,6 +23,7 @@ jobs:
         # Create an environment variable file that would be passed to the IaC docker image. Note that all relevant environment values need to be passed through here.
           run: |
             env | grep "GITHUB_\|LW_\|CI_" > env.list
+            echo "GIT_REPO=charles-misbehaving-org/terragoat2024" >> env.list
             echo "LW_ACCOUNT=${{ secrets.LW_ACCOUNT }}" >> env.list
             echo "LW_API_KEY=${{ secrets.LW_API_KEY }}" >> env.list
             echo "LW_API_SECRET=${{ secrets.LW_API_SECRET }}" >> env.list
