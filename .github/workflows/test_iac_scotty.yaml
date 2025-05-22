@@ -1,0 +1,92 @@
+Skip to content
+Navigation Menu
+scotty-iacv2-dev5
+cloudy-dev5-pipeline
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+lacework-iac-scan-json-report
+lacework-iac-scan-json-report #5
+Jobs
+Run details
+Workflow file for this run
+.github/workflows/iac-scan-3.yaml at bbcf47e
+name: lacework-iac-scan-json-report
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  Lacework-Scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Lacework IaC Scan
+        id: laceworkscan
+        env:
+          LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
+          LW_API_KEY: ${{ secrets.LW_API_KEY }}
+          LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
+        run: |
+          # Setup
+          IAC_REPORTS_DIR="/tmp/iac_reports"
+          RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
+          mkdir $IAC_REPORTS_DIR
+          env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
+          echo "WORKSPACE=src" >> env.list
+          echo "JSON_OUTPUT_FILE=$RESULTS_JSON"  >> env.list
+          cat env.list
+          # Run the Scan
+          docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec:stable lacework iac scan
+          
+          # Copy the report outside lacework/codesec:stable container
+          CONTAINER_ID=$(docker ps -a |grep codesec |head -n1 |cut -d ' ' -f1) # Extracts the latest container ID (Inside a Workflow there should be only one anyways)
+          
+          docker container cp "$CONTAINER_ID:/tmp/lacework-report.json" $IAC_REPORTS_DIR
+          
+          # Set GITHUB_ENV
+          
+          echo "RESULTS_JSON=$RESULTS_JSON" >> "$GITHUB_ENV"
+          echo "HERE I AM"
+      - name: 'Upload Artifacts'
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lacework Junit Report
+          path: /tmp/iac_reports/
+      - name: Publish IaC Scan Results
+        if: always()
+        run: |
+          # Create results summary
+          TESTS=$(cat $RESULTS_JSON |jq -r '.metrics.findings')
+          echo "TESTS: $TESTS"
+          TESTS_PASSED=$(cat $RESULTS_JSON |jq -r '.metrics.findingsPass')
+          echo "TESTS_PASSED: $TESTS_PASSED"
+          TESTS_FAILED=$(cat $RESULTS_JSON |jq -r '.metrics.findingsFail')
+          echo "TESTS_FAILED: $TESTS_FAILED"
+          
+          # Set GITHUB_ENV
+          echo "TESTS=$TESTS" >> "$GITHUB_ENV"
+          echo "TESTS_PASSED=$TESTS_PASSED" >> "$GITHUB_ENV"
+          echo "TESTS_FAILED=$TESTS_FAILED" >> "$GITHUB_ENV"
+          
+          # Adding a Step Summary to the workflow using $GITHUB_STEP_SUMMARY
+          echo "<table><tr><th><th>Tests</th><th>Passed ✅</th><th>Failed ❌</th></tr><tr><td>Lacework Scan Results</td><td>${TESTS} Ran</td><td>${TESTS_PASSED} Passed</td><td>${TESTS_FAILED} Failed</td></tr></table>" >> $GITHUB_STEP_SUMMARY
+Update iac-scan-3.yaml · scotty-iacv2-dev5/cloudy-dev5-pipeline@bbcf47e
