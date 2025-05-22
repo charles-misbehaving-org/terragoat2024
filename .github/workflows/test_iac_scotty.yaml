@@ -27,12 +27,9 @@ jobs:
           LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
         run: |
           # Setup
-          IAC_REPORTS_DIR="/tmp/iac_reports"
-          RESULTS_JSON="$IAC_REPORTS_DIR/lacework-report.json"
           mkdir $IAC_REPORTS_DIR
           env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
           echo "WORKSPACE=src" >> env.list
-          echo "JSON_OUTPUT_FILE=$RESULTS_JSON"  >> env.list
           cat env.list
           # Run the Scan
           docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec:stable lacework iac scan
