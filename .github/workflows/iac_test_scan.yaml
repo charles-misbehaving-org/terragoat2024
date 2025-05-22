@@ -28,11 +28,13 @@ jobs:
           uses: actions/checkout@v3
         - name: Create environment variables file
         # Create an environment variable file that would be passed to the IaC docker image. Note that all relevant environment values need to be passed through here.
+          env:
+          LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
+          LW_API_KEY: ${{ secrets.LW_API_KEY }}
+          LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
           run: |
-            env | grep "GH_\|GITHUB_\|LW_\|CI_" > env.list
-            echo "LW_ACCOUNT=${{ secrets.LW_ACCOUNT }}" >> env.list
-            echo "LW_API_KEY=${{ secrets.LW_API_KEY }}" >> env.list
-            echo "LW_API_SECRET=${{ secrets.LW_API_SECRET }}" >> env.list
+            env | grep "GITHUB_\|LW_\|CI_" > env.list
+            echo "WORKSPACE=src" >> env.list
             echo "EXIT_FLAG=CRITICAL=1" >> env.list
             cat env.list
         - name: Set permissions
