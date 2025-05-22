@@ -1,22 +1,3 @@
-Skip to content
-Navigation Menu
-scotty-iacv2-dev5
-cloudy-dev5-pipeline
-
-Type / to search
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-lacework-iac-scan-json-report
-lacework-iac-scan-json-report #5
-Jobs
-Run details
-Workflow file for this run
-.github/workflows/iac-scan-3.yaml at bbcf47e
 name: lacework-iac-scan-json-report
 
 on:
