@@ -27,7 +27,6 @@ jobs:
           LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
         run: |
           # Setup
-          mkdir $IAC_REPORTS_DIR
           env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
           echo "WORKSPACE=src" >> env.list
           cat env.list
