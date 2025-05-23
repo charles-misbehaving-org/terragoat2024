@@ -23,7 +23,7 @@ jobs:
       - name: Prepare Terraform Directory
         run: |
            mkdir -p .terraform
-           chmod 755 .terraform
+           chmod 777 .terraform
            chmod -R u+rwX,go-rwx .
            ls -la
         
