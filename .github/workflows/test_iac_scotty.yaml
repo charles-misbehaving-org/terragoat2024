@@ -28,7 +28,7 @@ jobs:
         run: |
           # Setup
           env | grep "GITHUB_\|LW_\|CI_" > env.list    # Set Lacework and other secrets
-          # echo "WORKSPACE=src" >> env.list
+          echo "WORKSPACE=src" >> env.list
           cat env.list
           # Run the Scan
           docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec:stable lacework iac scan
