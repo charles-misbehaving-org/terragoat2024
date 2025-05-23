@@ -23,7 +23,7 @@ jobs:
       - name: Prepare .terraform directory
         run: |
           mkdir -p .terraform
-          chmod 770 .terraform
+          chmod 777 .terraform
           ls -la
         
       - name: Lacework IaC Scan
