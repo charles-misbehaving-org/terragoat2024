@@ -22,6 +22,7 @@ jobs:
 
       - name: Prepare .terraform directory
         run: |
+          chmod -R 777 .
           mkdir -p .terraform
           chmod 777 .terraform
           ls -la
