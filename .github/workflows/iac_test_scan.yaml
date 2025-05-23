@@ -42,4 +42,5 @@ jobs:
             chmod -R 777 .terraform
         - name: Scan the repo for vulnerabilities in IaC
           run: |
+            cat env.list
             docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable lacework iac scan --directory=.
