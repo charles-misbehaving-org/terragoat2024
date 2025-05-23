@@ -20,12 +20,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Prepare .terraform directory
+      - name: Prepare Terraform Directory
         run: |
-          chmod -R 777 .
-          mkdir -p .terraform
-          chmod 777 .terraform
-          ls -la
+           mkdir -p .terraform
+           chmod 755 .terraform
+           chmod -R u+rwX,go-rwx .
+           ls -la
         
       - name: Lacework IaC Scan
         id: laceworkscan
