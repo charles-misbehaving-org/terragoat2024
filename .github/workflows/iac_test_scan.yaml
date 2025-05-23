@@ -36,4 +36,4 @@ jobs:
             echo "WORKSPACE=src" >> env.list
             cat env.list
             # Run the Scan
-            docker run --env-file env.list -v "$(pwd):/app/src" -w /app/src -D lacework/codesec:stable lacework iac scan --directory=.
+            docker run --debug --env-file env.list -v "$(pwd):/app/src" -w /app/src lacework/codesec:stable lacework iac scan --directory=.
