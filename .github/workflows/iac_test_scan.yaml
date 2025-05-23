@@ -17,8 +17,7 @@ permissions:
   actions: read
 
 jobs:
-    # This workflow contains a single job called "build"
-    build:
+   Lacework-Scanner:
     # The type of runner that the job will run on
       runs-on: ubuntu-24.04
       # Steps represent a sequence of tasks that will be executed as part of the job
@@ -36,6 +35,5 @@ jobs:
             env | grep "GITHUB_\|LW_\|CI_" > env.list
             echo "WORKSPACE=src" >> env.list
             cat env.list
-        - name: Scan the repo for vulnerabilities in IaC
-          run: |
+            # Run the Scan
             docker run --env-file env.list -v "$(pwd):/app/src"  -w /app/src lacework/codesec:stable lacework iac scan --directory=.
