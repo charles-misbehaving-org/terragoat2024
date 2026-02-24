@@ -1,10 +1,10 @@
 locals {
-  eks_name = {
-    value = "${local.resource_prefix.value}-eks"
+  eks_name2 = {
+    value = "${local.resource_prefix.value}-eks2"
   }
 }
 
-data aws_iam_policy_document "iam_policy_eks" {
+data aws_iam_policy_document "iam_policy_eks2" {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -16,9 +16,9 @@ data aws_iam_policy_document "iam_policy_eks" {
 }
 
 
-resource aws_iam_role "iam_for_eks" {
+resource aws_iam_role "iam_for_eks2" {
   name               = "${local.resource_prefix.value}-iam-for-eks"
-  assume_role_policy = data.aws_iam_policy_document.iam_policy_eks.json
+  assume_role_policy = data.aws_iam_policy_document.iam_policy_eks2.json
   tags = {
     git_commit           = "d68d2897add9bc2203a5ed0632a5cdd8ff8cefb0"
     git_file             = "terraform/aws/eks.tf"
@@ -31,17 +31,17 @@ resource aws_iam_role "iam_for_eks" {
   }
 }
 
-resource aws_iam_role_policy_attachment "policy_attachment-AmazonEKSClusterPolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.iam_for_eks.name
+resource aws_iam_role_policy_attachment "policy_attachment-AmazonEKSClusterPolicy2" {
+  policy_arn = aws_iam_policy.policy.arn
+  role       = aws_iam_role.iam_for_eks2.name
 }
 
-resource aws_iam_role_policy_attachment "policy_attachment-AmazonEKSServicePolicy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-  role       = aws_iam_role.iam_for_eks.name
+resource aws_iam_role_policy_attachment "policy_attachment-AmazonEKSServicePolicy2" {
+  policy_arn = aws_iam_policy.policy.arn
+  role       = aws_iam_role.iam_for_eks2.name
 }
 
-resource aws_vpc "eks_vpc" {
+resource aws_vpc "eks_vpc2" {
   cidr_block           = "10.10.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -59,14 +59,14 @@ resource aws_vpc "eks_vpc" {
   })
 }
 
-resource aws_subnet "eks_subnet1" {
-  vpc_id                  = aws_vpc.eks_vpc.id
+resource aws_subnet "eks_subnet12" {
+  vpc_id                  = aws_vpc.eks_vpc2.id
   cidr_block              = "10.10.10.0/24"
   availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
   tags = merge({
     Name                                            = "${local.resource_prefix.value}-eks-subnet"
-    "kubernetes.io/cluster/${local.eks_name.value}" = "shared"
+    "kubernetes.io/cluster/${local.eks_name2.value}" = "shared"
     }, {
     git_commit                                       = "6e62522d2ab8f63740e53752b84a6e99cd65696a"
     git_file                                         = "terraform/aws/eks.tf"
@@ -75,26 +75,26 @@ resource aws_subnet "eks_subnet1" {
     git_modifiers                                    = "nimrodkor"
     git_org                                          = "bridgecrewio"
     git_repo                                         = "terragoat"
-    "kubernetes.io/cluster/$${local.eks_name.value}" = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}" = "shared"
     yor_trace                                        = "1fb4fa23-a5d6-4d6a-b7dc-88749383f48d"
     }, {
-    "kubernetes.io/cluster/$$${local.eks_name.value}" = "shared"
-    "kubernetes.io/cluster/$${local.eks_name.value}"  = "shared"
+    "kubernetes.io/cluster/$$${local.eks_name2.value}" = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}"  = "shared"
     }, {
-    "kubernetes.io/cluster/$$$${local.eks_name.value}" = "shared"
-    "kubernetes.io/cluster/$$${local.eks_name.value}"  = "shared"
-    "kubernetes.io/cluster/$${local.eks_name.value}"   = "shared"
+    "kubernetes.io/cluster/$$$${local.eks_name2.value}" = "shared"
+    "kubernetes.io/cluster/$$${local.eks_name2.value}"  = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}"   = "shared"
   })
 }
 
-resource aws_subnet "eks_subnet2" {
-  vpc_id                  = aws_vpc.eks_vpc.id
+resource aws_subnet "eks_subnet22" {
+  vpc_id                  = aws_vpc.eks_vpc2.id
   cidr_block              = "10.10.11.0/24"
   availability_zone       = "${var.region}b"
   map_public_ip_on_launch = true
   tags = merge({
     Name                                            = "${local.resource_prefix.value}-eks-subnet2"
-    "kubernetes.io/cluster/${local.eks_name.value}" = "shared"
+    "kubernetes.io/cluster/${local.eks_name2.value}" = "shared"
     }, {
     git_commit                                       = "6e62522d2ab8f63740e53752b84a6e99cd65696a"
     git_file                                         = "terraform/aws/eks.tf"
@@ -103,30 +103,30 @@ resource aws_subnet "eks_subnet2" {
     git_modifiers                                    = "nimrodkor"
     git_org                                          = "bridgecrewio"
     git_repo                                         = "terragoat"
-    "kubernetes.io/cluster/$${local.eks_name.value}" = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}" = "shared"
     yor_trace                                        = "9ce04af2-5321-4e6c-a262-e4d7c1f69525"
     }, {
-    "kubernetes.io/cluster/$$${local.eks_name.value}" = "shared"
-    "kubernetes.io/cluster/$${local.eks_name.value}"  = "shared"
+    "kubernetes.io/cluster/$$${local.eks_name2.value}" = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}"  = "shared"
     }, {
-    "kubernetes.io/cluster/$$$${local.eks_name.value}" = "shared"
-    "kubernetes.io/cluster/$$${local.eks_name.value}"  = "shared"
-    "kubernetes.io/cluster/$${local.eks_name.value}"   = "shared"
+    "kubernetes.io/cluster/$$$${local.eks_name2.value}" = "shared"
+    "kubernetes.io/cluster/$$${local.eks_name2.value}"  = "shared"
+    "kubernetes.io/cluster/$${local.eks_name2.value}"   = "shared"
   })
 }
 
-resource aws_eks_cluster "eks_cluster" {
-  name     = local.eks_name.value
-  role_arn = "${aws_iam_role.iam_for_eks.arn}"
+resource aws_eks_cluster "eks_cluster2" {
+  name     = local.eks_name2.value
+  role_arn = "${aws_iam_role.iam_for_eks2.arn}"
 
   vpc_config {
     endpoint_private_access = true
-    subnet_ids              = ["${aws_subnet.eks_subnet1.id}", "${aws_subnet.eks_subnet2.id}"]
+    subnet_ids              = ["${aws_subnet.eks_subnet12.id}", "${aws_subnet.eks_subnet22.id}"]
   }
 
   depends_on = [
-    "aws_iam_role_policy_attachment.policy_attachment-AmazonEKSClusterPolicy",
-    "aws_iam_role_policy_attachment.policy_attachment-AmazonEKSServicePolicy",
+    aws_iam_role_policy_attachment.policy_attachment-AmazonEKSClusterPolicy2,
+    aws_iam_role_policy_attachment.policy_attachment-AmazonEKSServicePolicy2,
   ]
   tags = {
     git_commit           = "d68d2897add9bc2203a5ed0632a5cdd8ff8cefb0"
@@ -140,10 +140,10 @@ resource aws_eks_cluster "eks_cluster" {
   }
 }
 
-output "endpoint" {
-  value = "${aws_eks_cluster.eks_cluster.endpoint}"
+output "endpoint2" {
+  value = "${aws_eks_cluster.eks_cluster2.endpoint}"
 }
 
-output "kubeconfig-certificate-authority-data" {
-  value = "${aws_eks_cluster.eks_cluster.certificate_authority.0.data}"
+output "kubeconfig-certificate-authority-data2" {
+  value = "${aws_eks_cluster.eks_cluster2.certificate_authority.0.data}"
 }
