@@ -1,39 +1,43 @@
-name: lacework-iac-example
-# Controls when the workflow will run
 on:
-    # Triggers the workflow on push or pull request events but only for the "main" branch
-    push:
-        branches: [ "main" ]
-    pull_request:
-        branches: [ "main" ]
-    # Allows you to run this workflow manually from the Actions tab
-    workflow_dispatch:
-    # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  - pull_request
 
 permissions:
-  id-token: write
   contents: read
-  security-events: write
-  actions: read
+  pull-requests: write
 
+env:
+  LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
+  LW_API_KEY: ${{ secrets.LW_API_KEY }}
+  LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
+
+name: Lacework Code Security (PR)
 jobs:
-   Lacework-Scanner:
-    # The type of runner that the job will run on
-      runs-on: ubuntu-24.04
-      # Steps represent a sequence of tasks that will be executed as part of the job
-      steps:
-        # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        - name: Checkout Code
-          uses: actions/checkout@v3
-        - name: Lacework IAC Scan
-          env:
-            LW_ACCOUNT: ${{ secrets.LW_ACCOUNT }}
-            LW_API_KEY: ${{ secrets.LW_API_KEY }}
-            LW_API_SECRET: ${{ secrets.LW_API_SECRET }}
-          run: |
-            # Setup
-            env | grep "GITHUB_\|LW_\|CI_" > env.list
-            echo "WORKSPACE=src" >> env.list
-            cat env.list
-            # Run the Scan
-            docker run --env-file env.list -v "$(pwd):/app/src" lacework/codesec:stable lacework iac scan --directory=.
+  run-analysis:
+    runs-on: ubuntu-latest
+    name: Run analysis
+    strategy:
+      matrix:
+        target: [new, old]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+      - name: Checkout old
+        if: ${{ matrix.target == 'old' }}
+        run: git checkout HEAD^1
+      - name: Analyze
+        uses: lacework/code-security-action@v1
+        with:
+          target: ${{ matrix.target }}
+  display-results:
+    runs-on: ubuntu-latest
+    name: Display results
+    needs:
+      - run-analysis
+    steps:
+      - name: Results
+        id: code-analysis
+        uses: lacework/code-security-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
