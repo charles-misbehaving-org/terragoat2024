@@ -1,0 +1,55 @@
+name: Zagware Security Scanner
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]      # enables /zagware suppress comments
+
+concurrency:
+  group: zagware-scanner-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  contents: write   # required for /zagware suppress to commit suppressions.yaml
+
+jobs:
+  security-scan:
+    name: IaC + SCA security scan
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request != null &&
+       contains(github.event.comment.body, '/zagware suppress') &&
+       contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+    steps:
+      - name: Resolve PR refs (comment-triggered runs only)
+        if: github.event_name == 'issue_comment'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}")
+          echo "base_ref=$(echo "$PR_JSON" | jq -r .base.ref)" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(echo "$PR_JSON" | jq -r .head.ref)" >> "$GITHUB_OUTPUT"
+
+      - name: Zagware Security Scanner
+        uses: docker://ghcr.io/zagware/zagware-scanner:v3.0.0
+        env:
+          GITHUB_TOKEN:           ${{ github.token }}
+          PR_NUMBER:              ${{ github.event.pull_request.number || github.event.issue.number }}
+          ZAGWARE_BASE_REF:       ${{ steps.pr.outputs.base_ref }}
+          ZAGWARE_HEAD_REF:       ${{ steps.pr.outputs.head_ref }}
+          ZAGWARE_PLATFORM_URL:   ${{ secrets.ZAGWARE_PLATFORM_URL }}
+          ZAGWARE_PLATFORM_TOKEN: ${{ secrets.ZAGWARE_PLATFORM_TOKEN }}
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zagware-scan-results-pr${{ github.event.pull_request.number || github.event.issue.number }}
+          path: zagware-scan-results/
+          retention-days: 30
+          if-no-files-found: warn
